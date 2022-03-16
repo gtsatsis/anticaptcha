@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// Api is the struct used to store the http.Client & ClientKey for Anti-Captcha requests.
 type Api struct {
 	ClientKey  string `json:"clientKey"` // ClientKey is the API key used to access the Anti-Captcha service.
 	httpClient *http.Client
