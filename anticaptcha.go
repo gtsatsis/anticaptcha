@@ -115,6 +115,36 @@ func (a *Api) GetTaskStatus(t *Task) (map[string]interface{}, error) {
 	return nil, nil
 }
 
+func (a *Api) GetBalance() (float32, error) {
+	b, err := json.Marshal(map[string]interface{}{
+		"clientKey": a.ClientKey,
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	post, err := a.httpClient.Post("https://api.anti-captcha.com/getBalance", "application/json", bytes.NewReader(b))
+	if err != nil {
+		return 0, err
+	}
+
+	rbytes, err := io.ReadAll(post.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	rbody := &GetBalanceResponse{}
+	err = json.Unmarshal(rbytes, rbody)
+	if err != nil {
+		return 0, err
+	}
+	if rbody.ErrorId != 0 {
+		return 0, getApiError(rbody.ErrorCode)
+	}
+
+	return rbody.Balance, nil
+}
+
 func getApiError(errorCode string) error {
 	switch errorCode {
 	case "ERROR_KEY_DOES_NOT_EXIST":

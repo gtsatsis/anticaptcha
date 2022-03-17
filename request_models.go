@@ -19,3 +19,10 @@ type GetTaskResultResponse struct {
 	EndTime          int                    `json:"endTime"`
 	SolveCount       int                    `json:"solveCount"`
 }
+
+type GetBalanceResponse struct {
+	ErrorId          int     `json:"errorId"`
+	ErrorCode        string  `json:"errorCode"`
+	ErrorDescription string  `json:"errorDescription"`
+	Balance          float32 `json:"balance"`
+}
