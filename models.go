@@ -14,6 +14,7 @@ const (
 	TaskTypeRecaptchaV2EnterpriseProxyless TaskType = "RecaptchaV2EnterpriseTaskProxyless"
 	TaskTypeRecaptchaV3Proxyless           TaskType = "RecaptchaV3TaskProxyless"
 	TaskTypeFuncaptchaProxyless            TaskType = "FuncaptchaTaskProxyless"
+	TaskTypeHCaptchaProxyless              TaskType = "HCaptchaTaskProxyless"
 )
 
 type TaskStatus string
@@ -198,4 +199,46 @@ func NewRecaptchaV3TaskProxyless(websiteUrl string, websiteKey string, minScore 
 // ToTask creates a new Task object from a RecaptchaV3TaskProxyless.
 func (t *RecaptchaV3TaskProxyless) ToTask(a *Api) *Task {
 	return NewTask(a, TaskTypeRecaptchaV3Proxyless, t)
+}
+
+// FuncaptchaTaskProxyless is a captcha solving Task aimed at Funcaptcha (Arkose Labs).
+// See: https://anti-captcha.com/apidoc/task-types/FunCaptchaTaskProxyless
+type FuncaptchaTaskProxyless struct {
+	WebsiteUrl       string `json:"websiteURL"`
+	WebsitePublicKey string `json:"websitePublicKey"`
+	ApiJsSubdomain   string `json:"funcaptchaApiJSSubdomain,omitempty"`
+	Data             string `json:"data,omitempty"`
+}
+
+func NewFuncaptchaTaskProxyless(websiteUrl string, websitePublicKey string, apiJsSubdomain string, data string) (*FuncaptchaTaskProxyless, error) {
+	return &FuncaptchaTaskProxyless{
+		WebsiteUrl:       websiteUrl,
+		WebsitePublicKey: websitePublicKey,
+		ApiJsSubdomain:   apiJsSubdomain,
+		Data:             data,
+	}, nil
+}
+
+// ToTask creates a new Task object from a FuncaptchaTaskProxyless.
+func (t *FuncaptchaTaskProxyless) ToTask(a *Api) *Task {
+	return NewTask(a, TaskTypeFuncaptchaProxyless, t)
+}
+
+// HCaptchaTaskProxyless is a captcha solving Task aimed at hCaptcha.
+// See: https://anti-captcha.com/apidoc/task-types/HCaptchaTaskProxyless
+type HCaptchaTaskProxyless struct {
+	WebsiteUrl string `json:"websiteURL"`
+	WebsiteKey string `json:"websiteKey"`
+}
+
+func NewHCaptchaTaskProxyless(websiteUrl string, websiteKey string) (*HCaptchaTaskProxyless, error) {
+	return &HCaptchaTaskProxyless{
+		WebsiteUrl: websiteUrl,
+		WebsiteKey: websiteKey,
+	}, nil
+}
+
+// ToTask creates a new Task object from a HCaptchaTaskProxyless.
+func (t *HCaptchaTaskProxyless) ToTask(a *Api) *Task {
+	return NewTask(a, TaskTypeHCaptchaProxyless, t)
 }
