@@ -3,6 +3,8 @@ package anticaptcha
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -155,8 +157,10 @@ func getApiError(errorCode string) error {
 		return ErrZeroBalance
 	case "ERROR_NO_SUCH_CAPCHA_ID":
 		return ErrCaptchaIdExpired
+	case "ERROR_CAPTCHA_UNSOLVABLE":
+		return ErrCaptchaUnsolvable
 	default:
-		return nil
+		return errors.New(fmt.Sprintf("unknown upstream api error: %s", errorCode))
 	}
 }
 

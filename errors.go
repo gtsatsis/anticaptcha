@@ -10,4 +10,5 @@ var (
 	ErrApiKeyInvalid      = errors.New("invalid api key")
 	ErrNoAvailableWorkers = errors.New("no available workers")
 	ErrCaptchaIdExpired   = errors.New("captcha expired")
+	ErrCaptchaUnsolvable  = errors.New("captcha could not be solved by 5 different workers")
 )
