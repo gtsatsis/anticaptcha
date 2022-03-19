@@ -67,13 +67,13 @@ func (a *Api) SubmitTask(t *Task) error {
 }
 
 // GetTaskStatus retrieves the status of a Task object.
-func (a *Api) GetTaskStatus(t *Task) (map[string]interface{}, error) {
+func (a *Api) GetTaskStatus(t *Task) (string, error) {
 	if t.ID == 0 || t.Status == TaskStatusNotSubmitted {
-		return nil, ErrTaskNotSubmitted
+		return "", ErrTaskNotSubmitted
 	}
 
 	if time.Now().Sub(time.Unix(t.lastChecked, 0)) < 3*time.Second {
-		return nil, ErrCheckingTooFast
+		return "", ErrCheckingTooFast
 	}
 
 	b, err := json.Marshal(map[string]interface{}{
@@ -81,38 +81,38 @@ func (a *Api) GetTaskStatus(t *Task) (map[string]interface{}, error) {
 		"taskId":    t.ID,
 	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	post, err := a.httpClient.Post("https://api.anti-captcha.com/getTaskResult", "application/json", bytes.NewReader(b))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	rbytes, err := io.ReadAll(post.Body)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	rbody := &GetTaskResultResponse{}
 	err = json.Unmarshal(rbytes, rbody)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	if rbody.ErrorId != 0 {
-		return nil, getApiError(rbody.ErrorCode)
+		return "", getApiError(rbody.ErrorCode)
 	}
 
 	if rbody.Status == string(TaskStatusProcessing) {
 		t.lastChecked = time.Now().Unix()
-		return nil, ErrTaskNotComplete
+		return "", ErrTaskNotComplete
 	}
 
 	if rbody.Status == string(TaskStatusReady) {
-		return rbody.Solution, nil
+		return getApiSolution(t.Type, rbody.Solution), nil
 	}
 
-	return nil, nil
+	return "", nil
 }
 
 func (a *Api) GetBalance() (float32, error) {
@@ -158,5 +158,19 @@ func getApiError(errorCode string) error {
 	default:
 		return nil
 	}
+}
 
+func getApiSolution(tt TaskType, solution map[string]interface{}) string {
+	switch tt {
+	case TaskTypeImageToText:
+		return solution["text"].(string)
+	case TaskTypeRecaptchaV2Proxyless:
+	case TaskTypeRecaptchaV2EnterpriseProxyless:
+	case TaskTypeRecaptchaV3Proxyless:
+	case TaskTypeHCaptchaProxyless: // See: https://anti-captcha.com/apidoc/task-types/HCaptchaTaskProxyless
+		return solution["gRecaptchaResponse"].(string)
+	case TaskTypeFuncaptchaProxyless:
+		return solution["token"].(string)
+	}
+	return ""
 }

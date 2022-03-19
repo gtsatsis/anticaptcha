@@ -79,7 +79,7 @@ func (t *Task) Submit() error {
 	return t.api.SubmitTask(t)
 }
 
-func (t *Task) GetStatus() (map[string]interface{}, error) {
+func (t *Task) GetStatus() (string, error) {
 	return t.api.GetTaskStatus(t)
 }
 
